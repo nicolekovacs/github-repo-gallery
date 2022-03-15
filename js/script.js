@@ -4,6 +4,8 @@ const username = "nicolekovacs";
 const repoList = document.querySelector(".repo-list");
 const repositories = document.querySelector(".repos");
 const repoData = document.querySelector(".repo-data");
+const backButton = document.querySelector(".view-repos");
+const filterInput = document.querySelector(".filter-repos");
 
 const getData = async function () {
     const response = await fetch(`https://api.github.com/users/${username}`);
@@ -27,7 +29,7 @@ const userInfoDisplay = function (data) {
         <p><strong>Number of public repos:</strong> ${data.public_repos}</p>
     </div>`;
     profileInfo.append(div);
-    fetchRepoList();
+    fetchRepoList(username);
 };
 
 const fetchRepoList = async function () {
@@ -36,9 +38,8 @@ const fetchRepoList = async function () {
     repoInfoDisplay(repos);
 };
 
-fetchRepoList();
-
 const repoInfoDisplay = function (repos) {
+    filterInput.classList.remove("hide");
     for (const repo of repos) {
         const item = document.createElement("li");
         item.classList.add("repo");
@@ -57,7 +58,6 @@ repoList.addEventListener("click", function (e) {
 const getRepoInfo = async function (repoName) {
     const getRepo = await fetch(`https://api.github.com/repos/${username}/${repoName}`);
     const repoInfo = await getRepo.json();
-    console.log(repoInfo);
 
     const fetchLanguages = await fetch(repoInfo.languages_url);
     const languageData = await fetchLanguages.json();
@@ -65,7 +65,6 @@ const getRepoInfo = async function (repoName) {
     const languages = [];
     for (const language in languageData) {
     languages.push(language);
-    console.log(languages);
 }
 
     displayRepoInfo(repoInfo, languages);
@@ -84,4 +83,26 @@ const displayRepoInfo = function (repoInfo, languages) {
     repoData.append(div);
     repoData.classList.remove("hide");
     repositories.classList.add("hide");
+    backButton.classList.remove("hide");
 };
+
+backButton.addEventListener("click", function () {
+    repositories.classList.remove("hide");
+    repoData.classList.add("hide");
+    backButton.classList.add("hide");
+});
+
+filterInput.addEventListener("input", function (e) {
+    const search = e.target.value;
+    const repos = document.querySelectorAll(".repo");
+    const lowercase = search.toLowerCase();
+
+    for (const repo of repos) {
+        const lowerCaseValue = repo.innerText.toLowerCase();
+        if (lowerCaseValue.includes(lowercase)) {
+            repo.classList.remove("hide");
+        } else {
+            repo.classList.add("hide");
+        }
+    }
+});
